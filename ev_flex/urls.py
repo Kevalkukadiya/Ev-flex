@@ -20,5 +20,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('state/',include("state.urls")),
     path('city/',include("city.urls")),
+    path('area/',include("area.urls")),
+    path('user/', include('account.urls')),
+
+    
 
 ]
