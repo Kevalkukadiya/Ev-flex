@@ -4,30 +4,30 @@ from django.utils.timezone import now
 
 #  Custom User Manager
 class UserManager(BaseUserManager):
-  def create_user(self, email, name,password=None, confirm_password=None):
+  def create_user(self, email, first_name ,password=None, confirm_password=None):
       """
-      Creates and saves a User with the given email, name, tc and password.
+      Creates and saves a User with the given email, name and password.
       """
       if not email:
           raise ValueError('User must have an email address')
 
       user = self.model(
           email=self.normalize_email(email),
-          name=name,
+          first_name=first_name,
       )
 
       user.set_password(password)
       user.save(using=self._db)
       return user
 
-  def create_superuser(self, email, name,  password=None):
+  def create_superuser(self, email, first_name,  password=None):
       """
-      Creates and saves a superuser with the given email, name, tc and password.
+      Creates and saves a superuser with the given email, name and password.
       """
       user = self.create_user(
           email,
           password=password,
-          name=name,
+          first_name=first_name,
       )
       user.is_admin = True
       user.save(using=self._db)
@@ -46,10 +46,12 @@ class User(AbstractBaseUser):
         )
  
   user_type = models.CharField(max_length=9, choices=TYPE_CHOICE, default="CUSTOMER")
-  name = models.CharField(max_length=200)
+  first_name = models.CharField(max_length=200)
+  middle_name = models.CharField(max_length=200, null=True)
+  last_name = models.CharField(max_length=200, null=True)
   address = models.CharField(max_length=255, null=True)
-  phone = models.CharField(max_length=25, unique=True)
-  birth_date = models.DateField(default=now)
+  mobile_number = models.CharField(max_length=25)
+  date_of_birth = models.DateField(default=now)
   is_active = models.BooleanField(default=True)
   is_admin = models.BooleanField(default=False)
   created_by = models.IntegerField(default=1, unique=False)
@@ -59,7 +61,7 @@ class User(AbstractBaseUser):
   objects = UserManager()
 
   USERNAME_FIELD = 'email'
-  REQUIRED_FIELDS = ['name']
+  REQUIRED_FIELDS = ['first_name']
 
   def __str__(self):
       return self.email

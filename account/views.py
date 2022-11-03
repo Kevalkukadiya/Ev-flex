@@ -1,15 +1,15 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
 from account.models import User
-from account.serializers import  UserChangePasswordSerializer, UserLoginSerializer, UserRegistrationSerializer, UserGetSerializer
+from account.serializers import UserGetSerializer, UserChangePasswordSerializer, UserLoginSerializer,UserRegistrationSerializer
 from django.contrib.auth import authenticate
 from account.renderers import UserRenderer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from django.contrib.auth import logout
-
 
 # =============================== Generate Token Manually ==============================
 def get_tokens_for_user(user):
@@ -22,21 +22,19 @@ def get_tokens_for_user(user):
 # ============================= User Registration ======================================
 
 class UserRegistrationView(APIView):
-  renderer_classes = [UserRenderer]
+  # renderer_classes = [UserRenderer]
   def post(self, request, format=None):
-    user = User()
     serializer = UserRegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-
-
     token = get_tokens_for_user(user)
     return Response({'token':token, 'msg':'Registration Successful'}, status=status.HTTP_201_CREATED)
+
 
 # ============================= User Login  ======================================
 
 class UserLoginView(APIView):
-  renderer_classes = [UserRenderer]
+  # renderer_classes = [UserRenderer]
   def post(self, request, format=None):
     serializer = UserLoginSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -50,7 +48,7 @@ class UserLoginView(APIView):
       return Response({'errors':{'non_field_errors':['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
 
 
- # ============================= All User ======================================
+# ============================= All User ======================================
 
 @api_view(['GET'])
 def get_user(request, id=None):
@@ -82,8 +80,7 @@ def get_user(request, id=None):
         data["data"] = serializer.data
         return Response(data=data, status=status.HTTP_200_OK)
 
-
-# ============================= User Change Password ======================================
+# =============================  Change Password  ======================================
 
 class UserChangePasswordView(APIView):
   renderer_classes = [UserRenderer]
@@ -93,6 +90,8 @@ class UserChangePasswordView(APIView):
     serializer.is_valid(raise_exception=True)
     return Response({'msg':'Password Changed Successfully'}, status=status.HTTP_200_OK)
 
+
+
 # ============================= Update User  ======================================
 
 @api_view(['POST'])
@@ -101,8 +100,8 @@ def update_user(request, pk):
     user = User.objects.get(id=pk)
     serializer = UserGetSerializer(instance=user, data=request.data)
 
-    if User.objects.filter(**request.data).exists():
-        raise serializer.ValidationError('This User is Already exists')
+    # if User.objects.filter(**request.data).exists():
+    #     raise serializer.ValidationError('This User is Already exists')
         
     if serializer.is_valid():
         serializer.save()
@@ -135,31 +134,20 @@ def delete_user(request, pk):
 
     return Response('User is Delete Succefully')
 
-
 # ============================= Send Password Rest on Email  ======================================
 
 # class SendPasswordResetEmailView(APIView):
-#   renderer_classes = [UserRenderer]
-#   def post(self, request, format=None):
-#     serializer = SendPasswordResetEmailSerializer(data=request.data)
-#     serializer.is_valid(raise_exception=True)
-#     return Response({'msg':'Password Reset link send. Please check your Email'}, status=status.HTTP_200_OK)
-
-# # =============================  Rest via  Email  ======================================
+  # renderer_classes = [UserRenderer]
+  # def post(self, request, format=None):
+  #   serializer = SendPasswordResetEmailSerializer(data=request.data)
+  #   serializer.is_valid(raise_exception=True)
+  #   return Response({'msg':'Password Reset link send. Please check your Email'}, status=status.HTTP_200_OK)
 
 # class UserPasswordResetView(APIView):
-#   renderer_classes = [UserRenderer]
-#   def post(self, request, uid, token, format=None):
-#     serializer = UserPasswordResetSerializer(data=request.data, context={'uid':uid, 'token':token})
-#     serializer.is_valid(raise_exception=True)
-#     return Response({'msg':'Password Reset Successfully'}, status=status.HTTP_200_OK)
-   
-# ============================= User Profile ======================================
+  # renderer_classes = [UserRenderer]
+  # def post(self, request, uid, token, format=None):
+  #   serializer = UserPasswordResetSerializer(data=request.data, context={'uid':uid, 'token':token})
+  #   serializer.is_valid(raise_exception=True)
+  #   return Response({'msg':'Password Reset Successfully'}, status=status.HTTP_200_OK)
 
-# class UserProfileView(APIView):
-#   # renderer_classes = [UserRenderer]
-#   # permission_classes = [IsAuthenticated]
-#   def get(self, request, format=None):
-#     serializer = UserProfileSerializer(request.user)
 
-#     return Response(serializer.data, status=status.HTTP_200_OK)

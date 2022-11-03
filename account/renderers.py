@@ -11,4 +11,3 @@ class UserRenderer(renderers.JSONRenderer):
       response = json.dumps(data)
     
     return response
-    
